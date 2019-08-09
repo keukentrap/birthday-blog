@@ -17,16 +17,24 @@
 <body >
 <div class="container" style="margin-top:2em;">
 	<h1>Homepage</h1>
-	{{if .UserName}}
-		Welkom, {{.UserName}}!<br/>
-		{{ if eq .Role "admin" }}
-		<a href="/admin" class="button" >admin</a><br/>
+	{{if .User.UserName}}
+		{{with .User}}
+			Welkom, {{.UserName}}!<br/>
+			{{ if eq .Role "admin" }}
+				<a href="/admin" class="button" >admin</a>
+			{{end}}
+			<a href="/upload" class="button">upload</a>
+			<a href="/logout" class="button" >logout</a><br/>
 		{{end}}
-		<a href="/logout" class="button" >logout</a><br/>
 	{{else}}
-		<a href="/login" class="button" >Login</a><br/>
-		<a href="/signup" class="button" >Sign up</a>
+		<a href="/login" class="button" >Login</a>
+		<a href="/signup" class="button" >Sign up</a><br/>
 	{{end}}
+
+	{{range .Files}}
+	<img style="max-width:100%;" src="{{.}}" /><br/>
+	{{end}}
+	
 	<hr />
 	<div style="display:block;text-align: right;color: #888;"><small> Wietze Mulder </small></div>
 </div>

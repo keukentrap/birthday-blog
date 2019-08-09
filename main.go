@@ -5,6 +5,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"html/template"
 	"net/http"
+	"strings"
+	"fmt"
+	"io"
+	"crypto/sha1"
+	"os"
+	"path/filepath"
 )
 
 type user struct {
@@ -30,13 +36,22 @@ func main() {
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/admin", admin)
+	http.HandleFunc("/upload", upload)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	http.ListenAndServe(":8001", nil)
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
 	u, _ := getUserifLoggedin(req)
-	tpl.ExecuteTemplate(w, "index.gohtml", u)
+	fs, _ := filepath.Glob("static/uploads/*")
+	data := struct {
+		User user
+		Files []string
+	} {
+		u,
+		fs,
+	}
+	tpl.ExecuteTemplate(w, "index.gohtml", data)
 }
 
 func admin(w http.ResponseWriter, req *http.Request) {
@@ -51,6 +66,45 @@ func admin(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	tpl.ExecuteTemplate(w, "admin.gohtml", u)
+}
+
+func upload(w http.ResponseWriter, req *http.Request) {
+	if !alreadyLoggedIn(req) {
+		http.Redirect(w, req, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if req.Method == http.MethodPost {
+		mf, fh, err := req.FormFile("nf")
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer mf.Close()
+		// create sha for file name
+		ext := strings.Split(fh.Filename, ".")[1]
+		h := sha1.New()
+		io.Copy(h, mf)
+		fname := fmt.Sprintf("%x.%s", h.Sum(nil), ext)
+		// create new file
+		wd, err := os.Getwd()
+		if err != nil {
+			fmt.Println(err)
+		}
+		path := filepath.Join(wd, "static", "uploads", fname)
+		nf, err := os.Create(path)
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer nf.Close()
+		// copy
+		mf.Seek(0,0)
+		io.Copy(nf,mf)
+
+		http.Redirect(w, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	tpl.ExecuteTemplate(w, "upload.gohtml", nil)
 }
 
 func login(w http.ResponseWriter, req *http.Request) {
@@ -94,7 +148,6 @@ func signup(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
-	// get cookie
 
 	// if the user exists already, get user
 
