@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>🙇</title>
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="/static/css/normalize.css">
+  <link rel="stylesheet" href="/static/css/skeleton.css">
+  <link rel="stylesheet" href="/static/css/blog.css">
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/static/images/favicon.png">
+</head>
+<body >
+<div class="container" style="margin-top:2em;">
+	<h1>Login</h1>
+	<form method="post">
+	<input type="text" name="username" placeholder="username" autofocus/><br/>
+	<input type="password" name="password" placeholder="password" /> <br/>
+	<input type="submit" value="Login" />
+	</form>
+
+	{{if .UserName}}
+	Welkom, {{.UserName}}!<br/>
+	{{end}}
+	<hr />
+	<div style="display:block;text-align: right;color: #888;"><small> Wietze Mulder </small></div>
+</div>
+</body>
+</html>
